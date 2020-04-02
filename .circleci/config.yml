@@ -1,0 +1,61 @@
+version: 2.1
+
+executors:
+  node:
+    docker:
+      - image: node:12.16.1
+
+commands:
+  setup_job:
+    description: 'Install and set all the required components to run the jobs'
+    steps:
+      - run:
+          name: 'Install Dependencies'
+          command: npm i
+
+jobs:
+  lint:
+    executor: node
+    steps:
+      - checkout
+      - setup_job
+      - run:
+          name: 'Run Linter'
+          command: npm run lint
+  test:
+    executor: node
+    steps:
+      - checkout
+      - setup_job
+      - run:
+          name: 'Run Tests'
+          command: npm test
+
+workflows:
+  version: 2
+
+  development:
+    jobs:
+      - lint:
+          filters:
+            branches:
+              ignore: master
+      - test:
+          filters:
+            branches:
+              ignore: master
+          requires:
+            - lint
+
+  production:
+    jobs:
+      - lint:
+          filters:
+            branches:
+              only: master
+      - test:
+          filters:
+            branches:
+              only: master
+          requires:
+            - lint
