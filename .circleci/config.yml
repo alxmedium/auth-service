@@ -14,6 +14,27 @@ commands:
           command: npm i
 
 jobs:
+  codacy:
+    executor: node
+    steps:
+      - checkout
+      - setup_job
+      - run:
+          name: 'Codacy'
+          command: |
+            npm test
+            bash <(curl -Ls https://coverage.codacy.com/get.sh)
+  codecov:
+    executor: node
+    steps:
+      - checkout
+      - setup_job
+      - run:
+          name: 'CodeCov'
+          command: |
+            npm test
+            cp coverage/coverage-final.json coverage/coverage.json
+            bash <(curl -s https://codecov.io/bash)
   lint:
     executor: node
     steps:
@@ -46,6 +67,18 @@ workflows:
               ignore: master
           requires:
             - lint
+      - codecov:
+          filters:
+            branches:
+              ignore: master
+          requires:
+            - test
+      - codacy:
+          filters:
+            branches:
+              ignore: master
+          requires:
+            - test
 
   production:
     jobs:
@@ -59,3 +92,15 @@ workflows:
               only: master
           requires:
             - lint
+      - codecov:
+          filters:
+            branches:
+              only: master
+          requires:
+            - test
+      - codacy:
+          filters:
+            branches:
+              only: master
+          requires:
+            - test
