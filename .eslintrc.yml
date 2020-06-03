@@ -16,5 +16,15 @@ plugins:
   - '@typescript-eslint'
   - prettier
 rules:
+  class-methods-use-this:
+    - 0
+  import/extensions:
+    - error
+    - ignorePackages
+    - ts: never
   prettier/prettier:
     - error
+settings:
+  import/resolver:
+    node:
+      extensions: ['.ts']

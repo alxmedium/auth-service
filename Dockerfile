@@ -1,6 +1,6 @@
 FROM node:12.16.1
 
-WORKDIR /urs/alxmedium/auth
+WORKDIR /urs/alxmedium/auth-service
 
 COPY package*.json ./
 
@@ -10,4 +10,4 @@ COPY ./build ./
 
 EXPOSE 3000
 
-CMD node build/server.js
+CMD node server.js

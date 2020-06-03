@@ -1,5 +1,13 @@
-function add(number1: number, number2: number) {
-  return number1 + number2;
-}
+import { createServer } from 'http';
 
-export default add;
+import expressApp from './src/app';
+import logger from './src/util/logger';
+
+const PORT: number = Number(process.env.PORT) || 3000;
+const HOST: string = process.env.HOST || '0.0.0.0';
+
+const server = createServer(expressApp);
+
+server.listen(PORT, HOST, () => {
+  logger.info(`auth-service is running at http://${HOST}:${PORT}`);
+});
