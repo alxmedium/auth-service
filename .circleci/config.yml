@@ -3,54 +3,76 @@ version: 2.1
 executors:
   node:
     docker:
-      - image: node:12.16.1
+      - image: circleci/node:12.16.1
+  node_and_postgres:
+    docker:
+      - image: circleci/node:12.16.1
+      - image: postgres:12.3
+        environment:
+          POSTGRES_DB: alxmedium-auth
+          POSTGRES_PASSWORD: alxmedium-auth-service-password
+          POSTGRES_USER: alxmedium-auth-service
 
 commands:
-  setup_job:
-    description: 'Install and set all the required components to run the jobs'
+  install_dependencies:
+    description: 'Install Dependencies'
     steps:
+      - restore_cache:
+          keys:
+            - auth-service-{{ .Branch }}-{{ checksum "package-lock.json" }}
       - run:
           name: 'Install Dependencies'
           command: npm i
+      - save_cache:
+          key: auth-service-{{ .Branch }}-{{ checksum "package-lock.json" }}
+          paths: ~/.cache
 
 jobs:
   codacy:
-    executor: node
+    executor: node_and_postgres
     steps:
       - checkout
-      - setup_job
+      - install_dependencies
       - run:
           name: 'Codacy'
           command: |
-            npm test
+            npm run test:ci
             bash <(curl -Ls https://coverage.codacy.com/get.sh)
   codecov:
-    executor: node
+    executor: node_and_postgres
     steps:
       - checkout
-      - setup_job
+      - install_dependencies
       - run:
           name: 'CodeCov'
           command: |
-            npm test
+            npm run test:ci
             cp coverage/coverage-final.json coverage/coverage.json
             bash <(curl -s https://codecov.io/bash)
   lint:
     executor: node
     steps:
       - checkout
-      - setup_job
+      - install_dependencies
       - run:
           name: 'Run Linter'
           command: npm run lint
-  test:
+  test_integration:
+    executor: node_and_postgres
+    steps:
+      - checkout
+      - install_dependencies
+      - run:
+          name: 'Run Integration Tests'
+          command: npm run test:ci:integration
+  test_unit:
     executor: node
     steps:
       - checkout
-      - setup_job
+      - install_dependencies
       - run:
-          name: 'Run Tests'
-          command: npm run test:ci
+          name: 'Run Unit Tests'
+          command: npm run test:ci:unit
 
 workflows:
   version: 2
@@ -61,7 +83,13 @@ workflows:
           filters:
             branches:
               ignore: master
-      - test:
+      - test_integration:
+          filters:
+            branches:
+              ignore: master
+          requires:
+            - lint
+      - test_unit:
           filters:
             branches:
               ignore: master
@@ -72,13 +100,15 @@ workflows:
             branches:
               ignore: master
           requires:
-            - test
+            - test_integration
+            - test_unit
       - codacy:
           filters:
             branches:
               ignore: master
           requires:
-            - test
+            - test_integration
+            - test_unit
 
   production:
     jobs:
@@ -86,7 +116,13 @@ workflows:
           filters:
             branches:
               only: master
-      - test:
+      - test_integration:
+          filters:
+            branches:
+              only: master
+          requires:
+            - lint
+      - test_unit:
           filters:
             branches:
               only: master
@@ -97,10 +133,12 @@ workflows:
             branches:
               only: master
           requires:
-            - test
+            - test_integration
+            - test_unit
       - codacy:
           filters:
             branches:
               only: master
           requires:
-            - test
+            - test_integration
+            - test_unit

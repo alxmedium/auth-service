@@ -1,5 +1,10 @@
 interface Configuration {
-  host: string;
-  port: number;
+  dbHost: string;
+  dbName: string;
+  dbPassword: string;
+  dbPort: number;
+  dbUsername: string;
   privateKey: string;
+  serviceHost: string;
+  servicePort: number;
 }

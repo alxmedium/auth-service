@@ -1,9 +1,11 @@
 import InvalidEmail from './invalidEmail';
 import PasswordDoesNotMatch from './passwordDoesNotMatch';
-import UserNotFound from './userNotFound';
+import PostgresConnection from './postgresConnection';
+import CustomerNotFound from './customerNotFound';
 
 export default {
+  CustomerNotFound,
   InvalidEmail,
   PasswordDoesNotMatch,
-  UserNotFound,
+  PostgresConnection,
 };

@@ -1,6 +1,6 @@
 import { createServer } from 'http';
 
-import expressApp from './src/app';
+import expressApp from './src/api/app';
 import logger from './src/util/logger';
 
 const PORT: number = Number(process.env.PORT) || 3000;
