@@ -1,0 +1,8 @@
+branch: master
+repositoryUrl: https://github.com/AlexisNava/semantic-relase-test
+plugins:
+  - '@semantic-release/commit-analyzer'
+  - '@semantic-release/release-notes-generator'
+  - '@semantic-release/npm':
+      npmPublish: false
+  - '@semantic-release/changelog'

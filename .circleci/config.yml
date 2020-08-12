@@ -38,6 +38,7 @@ jobs:
           command: |
             npm run test:ci
             bash <(curl -Ls https://coverage.codacy.com/get.sh)
+
   codecov:
     executor: node_and_postgres
     steps:
@@ -49,6 +50,17 @@ jobs:
             npm run test:ci
             cp coverage/coverage-final.json coverage/coverage.json
             bash <(curl -s https://codecov.io/bash)
+
+  generate_release:
+    executor: node
+    steps:
+      - checkout
+      - run:
+          name: Generate Release
+          command: |
+            sudo npm i -g @semantic-release/changelog semantic-release
+            semantic-release
+
   lint:
     executor: node
     steps:
@@ -57,6 +69,7 @@ jobs:
       - run:
           name: 'Run Linter'
           command: npm run lint
+
   test_integration:
     executor: node_and_postgres
     steps:
@@ -65,6 +78,7 @@ jobs:
       - run:
           name: 'Run Integration Tests'
           command: npm run test:ci:integration
+
   test_unit:
     executor: node
     steps:
@@ -112,33 +126,7 @@ workflows:
 
   production:
     jobs:
-      - lint:
+      - generate_release:
           filters:
             branches:
               only: master
-      - test_integration:
-          filters:
-            branches:
-              only: master
-          requires:
-            - lint
-      - test_unit:
-          filters:
-            branches:
-              only: master
-          requires:
-            - lint
-      - codecov:
-          filters:
-            branches:
-              only: master
-          requires:
-            - test_integration
-            - test_unit
-      - codacy:
-          filters:
-            branches:
-              only: master
-          requires:
-            - test_integration
-            - test_unit
