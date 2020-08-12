@@ -58,7 +58,7 @@ jobs:
       - run:
           name: Generate Release
           command: |
-            sudo npm i -g @semantic-release/changelog semantic-release
+            sudo npm i -g @semantic-release/changelog @semantic-release/git semantic-release
             semantic-release
 
   lint:
